@@ -43,6 +43,9 @@
 python > 3.6
 
 ### 本地运行
+> 默认昵称：timetask
+> 
+> 默认密码：timetask
 
 ```python
 # 克隆本项目
@@ -57,5 +60,12 @@ python app.py
 
 ### Docker运行
 ```shell
-docker pull
+docker pull chenyme/timetask:0.1  # 拉取镜像
+
+docker run -d \
+    -e USERNAME=timetask \  # 修改你的默认昵称！！！
+    -e PASSWORD=timetask \  # 修改你的默认密码！！！
+    -e TZ=Asia/Shanghai \
+    -p 5000:5000 \
+    timetask
 ```
