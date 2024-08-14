@@ -1,0 +1,47 @@
+<div class="modal fade" id="updateTaskModal-{{ job.id }}" tabindex="-1" aria-labelledby="updateTaskModalLabel-{{ job.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateTaskModalLabel-{{ job.id }}">编辑任务 {{ job.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update-task-form-{{ job.id }}" action="{{ url_for('update_task') }}" method="POST">
+                    <input type="hidden" name="job_id" value="{{ job.id }}">
+                    <div class="form-group mb-3">
+                        <label for="interval_days" class="form-label">执行间隔 (天/时/分/秒):</label>
+                        <div class="input-group">
+                            {% set total_seconds = job.trigger.interval.total_seconds() %}
+                            {% set days = job.trigger.interval.days %}
+                            {% set hours = (total_seconds // 3600) % 24 %}
+                            {% set minutes = (total_seconds // 60) % 60 %}
+                            {% set seconds = total_seconds % 60 %}
+                            <input type="number" id="interval_days" name="interval_days" class="form-control" placeholder="天" min="0" value="{{ days | int }}" required>
+                            <input type="number" id="interval_hours" name="interval_hours" class="form-control" placeholder="时" min="0" max="23" value="{{ hours | int }}" required>
+                            <input type="number" id="interval_minutes" name="interval_minutes" class="form-control" placeholder="分" min="0" max="59" value="{{ minutes | int }}" required>
+                            <input type="number" id="interval_seconds" name="interval_seconds" class="form-control" placeholder="秒" min="0" max="59" value="{{ seconds | int }}" required>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="remark" class="form-label">备注</label>
+                        <textarea class="form-control" name="remark" rows="3">{{ job.kwargs.remark }}</textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>&nbsp;保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('update-task-form-{{ job.id }}').addEventListener('submit', function() {
+        setTimeout(function() {
+            location.reload();
+        }, 100);
+    });
+</script>
+

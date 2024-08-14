@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}编辑{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        编辑 - {{ filename }}
+    </div>
+
+    <form action="{{ url_for('edit_file', filename=filename) }}" method="POST" class="h-100">
+        <textarea id="editor" name="content" rows="20">{{ content }}</textarea>
+        <div class="card-footer">
+            <button type="button" class="btn btn-back" onclick="window.location.href='{{ url_for('script_management') }}';">
+                <i class="fas fa-arrow-left"></i>&nbsp;返回
+            </button>
+            <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> 保存</button>
+        </div>
+    </form>
+</div>
+
+<!-- 引入 CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/css/css.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/monokai.min.css">
+
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+        lineNumbers: true,
+        mode: "python",
+        theme: "default",
+        lineWrapping: true
+    });
+
+    // 设置 CodeMirror 编辑器的高度
+    editor.setSize(null, "480px");
+
+
+    editor.getWrapperElement().style.lineHeight = "1.4";
+    editor.getWrapperElement().style.fontSize = "14px";
+
+    // 根据文件扩展名动态设置 CodeMirror 的语法高亮模式
+    var filename = "{{ filename }}";
+    if (filename.endsWith(".js")) {
+        editor.setOption("mode", "javascript");
+    } else if (filename.endsWith(".py")) {
+        editor.setOption("mode", "python");
+    } else if (filename.endsWith(".html")) {
+        editor.setOption("mode", "htmlmixed");
+    } else if (filename.endsWith(".css")) {
+        editor.setOption("mode", "css");
+    }
+</script>
+{% endblock %}

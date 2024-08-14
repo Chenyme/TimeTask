@@ -1,0 +1,72 @@
+<div class="card">
+    <div class="card-header">
+        <span>文件管理</span>
+        <form id="upload-form" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" style="display:inline;">
+            <input type="file" id="file-input" name="file" style="display:none;" onchange="document.getElementById('upload-form').submit();">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-input').click();">
+                <i class="fas fa-upload"></i>&nbsp;上传文件
+            </button>
+        </form>
+    </div>
+
+    {% if files %}
+        <form id="batch-form" method="post">
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for file in files %}
+                    <li class="list-group-item">
+                        <div class="file-info">
+                            <input type="checkbox" name="selected_files" value="{{ file }}" class="file-checkbox">
+                            <span>{{ file }}</span> <!-- 文件名区域 -->
+                        </div>
+                        <div class="btn-container">
+                            <a href="{{ url_for('preview_file', filename=file) }}" class="btn-preview">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ url_for('edit_file', filename=file) }}" class="btn-edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card-footer">
+                <div>
+                    <button type="button" id="toggleButton" class="btn btn-select-all">
+                        <i class="fas fa-check-square"></i> 选中全部
+                    </button>
+                </div>
+                <div class="d-flex">
+                    <button type="submit" formaction="{{ url_for('batch_delete_files') }}" class="btn btn-batch-delete">
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
+                    <button type="submit" formaction="{{ url_for('batch_download_files') }}" class="btn btn-batch-download">
+                        <i class="fas fa-download"></i> 下载
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% else %}
+        <div class="card-body">
+            <p class="text-muted">当前没有上传的文件，快点击右上角上传你的脚本文件叭！</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // 全选按钮控制所有文件复选框的状态
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.file-checkbox');
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allChecked;
+        });
+
+        this.innerHTML = allChecked ? '<i class="fas fa-check-square"></i> 选中全部' : '<i class="fas fa-times-circle"></i> 取消全选';
+    });
+</script>
+

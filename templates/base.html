@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TimeTask{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <!-- 品牌标志 -->
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="TimeTask" height="40">
+                <span style="margin-left: 10px; font-size: 20px; color: #1c1c1e; font-weight: bold;">TimeTask</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="hamburger-menu d-lg-none">&#9776;</span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="fas fa-clock me-2"></i> 定时任务
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'script_management' %}active{% endif %}" href="{{ url_for('script_management') }}">
+                            <i class="fas fa-file-code me-2"></i> 文件管理
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex mt-5 pt-4">
+        <!-- 侧边栏 -->
+        <nav class="sidebar">
+            <br />
+            <div class="sidebar-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="TimeTask" height="35"> <span style="margin-left: 10px; font-size: 24px;">TimeTask</span>
+            </div>
+            <br />
+            <hr>
+            <br />
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                        <i class="fas fa-clock me-2"></i> 定时任务
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('script_management') }}" class="nav-link {% if request.endpoint == 'script_management' %}active{% endif %}">
+                        <i class="fas fa-file-code me-2"></i> 文件管理
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p>© 2024 TimeTask</p>
+                <p>
+                    <a href="https://github.com/Chenyme" target="_blank">@Chenyme</a> | <a href="https://github.com/Chenyme" target="_blank">使用说明</a>
+                </p>
+            </div>
+        </nav>
+
+        <!-- 主内容区 -->
+        <div class="content flex-fill p-4">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Toast 容器 -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="toast toast-{{ category }} border-0 mb-2 fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex align-items-center">
+                                <div class="toast-icon me-3">
+                                    {% if category == 'success' %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% elif category == 'error' %}
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    {% elif category == 'warning' %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    {% elif category == 'info' %}
+                                        <i class="fas fa-info-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastElList = document.querySelectorAll('.toast');
+            toastElList.forEach(function (toastEl, index) {
+                setTimeout(function() {
+                    var toastInstance = bootstrap.Toast.getOrCreateInstance(toastEl);
+                    toastInstance.show();
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+

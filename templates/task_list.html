@@ -1,0 +1,141 @@
+<div class="card">
+    <div class="card-header">
+        <span>当前任务</span>
+        <button type="button" class="btn-upload" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus"></i>&nbsp;添加任务
+        </button>
+    </div>
+
+    <div class="card-body">
+        {% if job_info %}
+        <div class="task-list">
+            {% for info in job_info %}
+            <div class="task-item" onclick="toggleCheckbox(this)">
+                <input type="checkbox" class="task-checkbox" value="{{ info.job.id }}">
+                <div class="task-info">
+                    <div class="task-title">ID：{{ info.job.id }}</div>
+                </div>
+                <div class="task-details">间隔：{{ format_interval(info.job.trigger.interval.total_seconds()) }}({{ info.job.trigger.interval.total_seconds() | int }}s)</div>
+                <div class="task-details">脚本：{{ info.job.kwargs.script_name }}</div>
+                <div class="task-details2">备注：{{ info.job.kwargs.remark if info.job.kwargs.remark else '无' }}</div>
+                <div class="task-status">
+                    <span class="status-indicator" data-remaining-time="{{ info.remaining_time }}" data-interval="{{ info.job.trigger.interval.total_seconds() }}" data-status="{% if info.job.next_run_time %}running{% else %}paused{% endif %}">
+                        {% if info.remaining_time %}
+                        {{ info.remaining_time }} 秒
+                        {% else %}
+                        已暂停
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="task-actions">
+                    <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#updateTaskModal-{{ info.job.id }}" onclick="event.stopPropagation()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="task-actions">
+                    <button class="btn-preview" onclick="event.stopPropagation(); window.location.href='{{ url_for('view_logs', job_id=info.job.id) }}'">
+                        <i class="fas fa-file-alt"></i>
+                    </button>
+                </div>
+            </div>
+            {% set job = info.job %}
+            {% include 'task_modal.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">目前没有任务。</p>
+        {% endif %}
+    </div>
+
+    <div class="card-footer">
+        <form id="batch-actions-form" method="post" class="w-100">
+            <div class="d-flex justify-content-between align-items-center w-100">
+
+                <button type="button" id="select-all-btn" class="btn btn-select-all">
+                    <i class="fas fa-check-square"></i> 选中全部
+                </button>
+
+                <div class="d-flex">
+                    <button type="submit" formaction="{{ url_for('batch_pause_tasks') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-pause"></i> 暂停
+                    </button>
+                    <button type="submit" formaction="{{ url_for('batch_resume_tasks') }}" class="btn btn-outline-success">
+                        <i class="fas fa-play"></i> 恢复
+                    </button>
+                    <button type="submit" formaction="{{ url_for('batch_delete_tasks') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
+                </div>
+            </div>
+            <input type="hidden" name="selected_tasks" id="selected-tasks">
+        </form>
+    </div>
+</div>
+
+<!-- 添加任务模态框 -->
+{% include 'task_form.html' %}
+
+<!-- 必要的脚本 -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js"></script>
+<script>
+    // 更新倒计时功能
+    function updateCountdowns() {
+        document.querySelectorAll('[data-remaining-time]').forEach(function(element) {
+            var remainingTime = parseInt(element.getAttribute('data-remaining-time'), 10);
+            var intervalTime = parseInt(element.getAttribute('data-interval'), 10);
+            var status = element.getAttribute('data-status');
+
+            if (status === 'paused') {
+                element.textContent = '已暂停';
+                return; // 如果任务已暂停，则停止更新
+            }
+
+            if (remainingTime > 0) {
+                remainingTime--;
+                element.setAttribute('data-remaining-time', remainingTime);
+                element.textContent = remainingTime + ' 秒';
+            } else {
+                // 倒计时结束，重置倒计时
+                remainingTime = intervalTime;
+                element.setAttribute('data-remaining-time', remainingTime);
+                element.textContent = remainingTime + ' 秒';
+            }
+        });
+    }
+
+    setInterval(updateCountdowns, 1000);
+
+    // 全选/取消全选功能
+    document.getElementById('select-all-btn').addEventListener('click', function() {
+        var checkboxes = document.querySelectorAll('.task-checkbox');
+        var allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = !allChecked;
+        });
+        this.innerHTML = allChecked ? '<i class="fas fa-check-square"></i> 选中全部' : '<i class="fas fa-times-circle"></i> 取消全选';
+    });
+
+    // 提交表单时，获取选中的任务ID
+    document.getElementById('batch-actions-form').addEventListener('submit', function(event) {
+        var selectedTasks = [];
+        var checkboxes = document.querySelectorAll('.task-checkbox:checked');
+        checkboxes.forEach(function(checkbox) {
+            selectedTasks.push(checkbox.value);
+        });
+
+        if (selectedTasks.length === 0) {
+            alert('请至少选择一个任务进行操作。');
+            event.preventDefault(); // 阻止表单提交
+        } else {
+            document.getElementById('selected-tasks').value = selectedTasks.join(',');
+        }
+    });
+
+    // 切换复选框状态
+    function toggleCheckbox(taskItem) {
+        var checkbox = taskItem.querySelector('.task-checkbox');
+        checkbox.checked = !checkbox.checked;
+    }
+</script>
